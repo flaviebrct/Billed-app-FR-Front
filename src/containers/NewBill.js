@@ -10,9 +10,7 @@ export default class NewBill {
       `form[data-testid="form-new-bill"]`
     );
     formNewBill.addEventListener("submit", this.handleSubmit);
-    const file = this.document
-      .querySelector(`input[data-testid="file"]`)
-      .setAttribute("accept", ".png, .jpg, .jpeg");
+    const file = this.document.querySelector(`input[data-testid="file"]`);
     file.addEventListener("change", () => {
       this.handleChangeFile;
     });
