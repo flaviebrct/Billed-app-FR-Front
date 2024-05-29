@@ -25,6 +25,16 @@ export default class NewBill {
       .files[0];
     const filePath = e.target.value.split(/\\/g);
     const fileName = filePath[filePath.length - 1];
+    const allowedExtensions = ["jpg", "jpeg", "png"];
+    const fileExtension = fileName.split(".").pop().toLowerCase();
+
+    if (!allowedExtensions.includes(fileExtension)) {
+      console.error(
+        "Extension de fichier non autorisée. Veuillez sélectionner un fichier jpg, jpeg ou png."
+      );
+      return;
+    }
+
     const formData = new FormData();
     const email = JSON.parse(localStorage.getItem("user")).email;
     formData.append("file", file);
@@ -39,7 +49,6 @@ export default class NewBill {
         },
       })
       .then(({ fileUrl, key }) => {
-        console.log(fileUrl);
         this.billId = key;
         this.fileUrl = fileUrl;
         this.fileName = fileName;
