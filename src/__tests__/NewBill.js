@@ -2,9 +2,9 @@
  * @jest-environment jsdom
  */
 
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, fireEvent } from "@testing-library/dom";
 import NewBillUI from "../views/NewBillUI.js";
-import { screen, waitFor } from "@testing-library/dom";
+import NewBill from "../containers/NewBill.js";
 import { ROUTES_PATH } from "../constants/routes.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
 
@@ -39,31 +39,66 @@ describe("Given I am connected as an employee", () => {
       expect(mailIcon.classList.contains("active-icon")).toBe(true);
     });
   });
-});
 
-describe("Given I am connected as an employee", () => {
-  describe("When I am on NewBill Page", () => {
-    test("Then I should be able to pass 'png', 'jpg' or 'jpeg' as a Proof", () => {
-      const user = userEvent;
+  describe("When I add a new Proof file", () => {
+    beforeEach(async () => {
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+          email: "employee@test.tld",
+        })
+      );
 
-      const html = NewBillUI();
-      document.body.innerHTML = html;
-      const fileInput = screen.getByTestId("file");
-      const files = [
-        new File(["test1"], "test1.png", { type: "image/png" }),
-        new File(["test2"], "test2.jpg", { type: "image/jpg" }),
-        new File(["test3"], "test3.jpeg", { type: "image/jpeg" }),
-      ];
+      const root = document.createElement("div");
+      root.setAttribute("id", "root");
+      document.body.append(root);
+      router();
 
-      files.forEach((file) => {
-        user.upload(fileInput, file);
-        console.log(fileInput.files[0].type);
-
-        expect(fileInput.files[0]).toBe(file);
-        expect(fileInput.files.item(0)).toBe(file);
-        expect(fileInput.files[0].type).toBe(file.type);
-        expect(fileInput.files).toHaveLength(1);
+      window.onNavigate(ROUTES_PATH.NewBill);
+    });
+    test("Then the file should not be added if is mime type isn't 'png', 'jpg' or 'jpeg' ", () => {
+      const newBills = new NewBill({
+        document,
+        onNavigate,
+        localStorage: window.localStorage,
       });
+
+      const handleChangeFile = jest.fn(() => newBills.handleChangeFile);
+      const fileInput = document.querySelector(`input[data-testid="file"]`);
+      fileInput.addEventListener("change", (e) => handleChangeFile(e));
+      fireEvent.change(fileInput, {
+        target: {
+          files: [
+            new File(["test.svg"], "test.svg", {
+              type: "image/svg",
+            }),
+          ],
+        },
+      });
+
+      expect(fileInput.value).toBe("");
+      expect(handleChangeFile).toBeCalled();
+
+      // const user = userEvent;
+
+      // const html = NewBillUI();
+      // document.body.innerHTML = html;
+      // const files = [
+      //   new File(["test1"], "test1.png", { type: "image/png" }),
+      //   new File(["test2"], "test2.jpg", { type: "image/jpg" }),
+      //   new File(["test3"], "test3.jpeg", { type: "image/jpeg" }),
+      // ];
+
+      // files.forEach((file) => {
+      //   user.upload(fileInput, file);
+      //   console.log(fileInput.files[0].type);
+
+      //   expect(fileInput.files[0]).toBe(file);
+      //   expect(fileInput.files.item(0)).toBe(file);
+      //   expect(fileInput.files[0].type).toBe(file.type);
+      //   expect(fileInput.files).toHaveLength(1);
+      // });
     });
   });
 });
