@@ -1,12 +1,15 @@
 /**
  * @jest-environment jsdom
  */
-
+import userEvent from "@testing-library/user-event";
 import { screen, waitFor, fireEvent } from "@testing-library/dom";
 import NewBillUI from "../views/NewBillUI.js";
 import NewBill from "../containers/NewBill.js";
-import { ROUTES_PATH } from "../constants/routes.js";
+import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
+import mockStore from "../__mocks__/store";
+
+jest.mock("../app/store", () => mockStore);
 
 import router from "../app/Router.js";
 
@@ -102,6 +105,72 @@ describe("Given I am connected as an employee", () => {
 
       expect(fileInput.files[0].type).toBe("image/jpeg");
       expect(handleChangeFile).toBeCalled();
+    });
+  });
+
+  // test d'intégration POST
+  describe("When I complete the form", () => {
+    test("Then if all the inputs are filled the form should be submitted and we should be redirected to the bill page", async () => {
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+          email: "employee@test.tld",
+          password: "employee",
+        })
+      );
+
+      const root = document.createElement("div");
+      root.setAttribute("id", "root");
+      document.body.append(root);
+      router();
+
+      const mockOnNavigate = jest.fn();
+
+      const newBill = new NewBill({
+        document,
+        onNavigate: mockOnNavigate,
+        store: mockStore,
+        localStorage: window.localStorage,
+      });
+
+      const handleSubmit = jest.fn((e) => newBill.handleSubmit(e));
+      const form = document.querySelector('form[data-testid="form-new-bill"]');
+
+      form.addEventListener("submit", (e) => {
+        handleSubmit(e);
+      });
+
+      const expenseType = document.querySelector(
+        `select[data-testid="expense-type"]`
+      );
+      const expenseName = document.querySelector(
+        `input[data-testid="expense-name"]`
+      );
+      const datePicker = document.querySelector(
+        `input[data-testid="datepicker"]`
+      );
+      const amount = document.querySelector(`input[data-testid="amount"]`);
+      const vat = document.querySelector(`input[data-testid="vat"]`);
+      const pct = document.querySelector(`input[data-testid="pct"]`);
+      const commentary = document.querySelector(
+        `textarea[data-testid="commentary"]`
+      );
+
+      const submitBtn = document.querySelector("#btn-send-bill");
+
+      expenseType.value = "Services en ligne";
+      expenseName.value = "Test services en ligne";
+      datePicker.value = "2020_08_06";
+      amount.value = 572;
+      vat.value = 93;
+      pct.value = 27;
+      commentary.value = "Ceci est un test d'intégration pour la méthode POST";
+
+      userEvent.click(submitBtn);
+
+      expect(handleSubmit).toBeCalled();
+      expect(mockOnNavigate).toHaveBeenCalledWith(ROUTES_PATH["Bills"]);
     });
   });
 });
