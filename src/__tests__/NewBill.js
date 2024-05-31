@@ -79,26 +79,29 @@ describe("Given I am connected as an employee", () => {
 
       expect(fileInput.value).toBe("");
       expect(handleChangeFile).toBeCalled();
+    });
+    test("Then the file should be added if is mime type is 'png', 'jpg' or 'jpeg' ", () => {
+      const newBills = new NewBill({
+        document,
+        onNavigate,
+        localStorage: window.localStorage,
+      });
 
-      // const user = userEvent;
+      const handleChangeFile = jest.fn(() => newBills.handleChangeFile);
+      const fileInput = document.querySelector(`input[data-testid="file"]`);
+      fileInput.addEventListener("change", (e) => handleChangeFile(e));
+      fireEvent.change(fileInput, {
+        target: {
+          files: [
+            new File(["test.jpeg"], "test.jpeg", {
+              type: "image/jpeg",
+            }),
+          ],
+        },
+      });
 
-      // const html = NewBillUI();
-      // document.body.innerHTML = html;
-      // const files = [
-      //   new File(["test1"], "test1.png", { type: "image/png" }),
-      //   new File(["test2"], "test2.jpg", { type: "image/jpg" }),
-      //   new File(["test3"], "test3.jpeg", { type: "image/jpeg" }),
-      // ];
-
-      // files.forEach((file) => {
-      //   user.upload(fileInput, file);
-      //   console.log(fileInput.files[0].type);
-
-      //   expect(fileInput.files[0]).toBe(file);
-      //   expect(fileInput.files.item(0)).toBe(file);
-      //   expect(fileInput.files[0].type).toBe(file.type);
-      //   expect(fileInput.files).toHaveLength(1);
-      // });
+      expect(fileInput.files[0].type).toBe("image/jpeg");
+      expect(handleChangeFile).toBeCalled();
     });
   });
 });
