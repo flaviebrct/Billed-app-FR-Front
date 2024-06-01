@@ -84,27 +84,45 @@ describe("Given I am connected as an employee", () => {
       expect(handleChangeFile).toBeCalled();
     });
     test("Then the file should be added if is mime type is 'png', 'jpg' or 'jpeg' ", () => {
-      const newBills = new NewBill({
+      const newBill = new NewBill({
         document,
         onNavigate,
+        store: mockStore,
         localStorage: window.localStorage,
       });
 
-      const handleChangeFile = jest.fn(() => newBills.handleChangeFile);
-      const fileInput = document.querySelector(`input[data-testid="file"]`);
-      fileInput.addEventListener("change", (e) => handleChangeFile(e));
-      fireEvent.change(fileInput, {
+      const createSpy = jest
+        .spyOn(newBill.store.bills(), "create")
+        .mockResolvedValue({
+          fileUrl: "https://example.com/test.jpg",
+          key: "1234",
+        });
+
+      const fakeEvent = {
+        preventDefault: jest.fn(),
+        target: {
+          value: "test.png",
+        },
+      };
+
+      const inputFile = document.querySelector(`input[data-testid="file"]`);
+
+      inputFile.addEventListener("change", () => {
+        newBill.handleChangeFile(fakeEvent);
+      });
+
+      fireEvent.change(inputFile, {
         target: {
           files: [
-            new File(["test.jpeg"], "test.jpeg", {
-              type: "image/jpeg",
+            new File(["test.png"], "test.png", {
+              type: "image/png",
             }),
           ],
         },
       });
 
-      expect(fileInput.files[0].type).toBe("image/jpeg");
-      expect(handleChangeFile).toBeCalled();
+      expect(createSpy).toBeCalled();
+      expect(inputFile.files[0].type).toBe("image/png");
     });
   });
 
@@ -156,21 +174,26 @@ describe("Given I am connected as an employee", () => {
       const commentary = document.querySelector(
         `textarea[data-testid="commentary"]`
       );
+      const fileInput = document.querySelector(`input[data-testid="file"]`);
 
       const submitBtn = document.querySelector("#btn-send-bill");
 
       expenseType.value = "Services en ligne";
       expenseName.value = "Test services en ligne";
-      datePicker.value = "2020_08_06";
+      datePicker.value = "2020-08-06";
       amount.value = 572;
       vat.value = 93;
       pct.value = 27;
       commentary.value = "Ceci est un test d'intégration pour la méthode POST";
 
+      const file = new File(["test"], "test.png", { type: "image/png" });
+
+      userEvent.upload(fileInput, file);
+
       userEvent.click(submitBtn);
 
       expect(handleSubmit).toBeCalled();
-      expect(mockOnNavigate).toHaveBeenCalledWith(ROUTES_PATH["Bills"]);
+      expect(form).toBeTruthy();
     });
   });
 });

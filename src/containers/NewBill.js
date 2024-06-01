@@ -28,11 +28,19 @@ export default class NewBill {
 
     if (file) {
       if (!allowedExtensions.includes(fileExtension)) {
-        e.target.setAttribute("data-error", "Le fichier n'est pas autorisé.");
-        e.target.setAttribute("data-error-visible", true);
+        document
+          .querySelector(`input[data-testid="file"]`)
+          .setAttribute("data-error", "Le fichier n'est pas autorisé.");
+        document
+          .querySelector(`input[data-testid="file"]`)
+          .setAttribute("data-error-visible", true);
       } else {
-        e.target.setAttribute("data-error", "");
-        e.target.setAttribute("data-error-visible", false);
+        document
+          .querySelector(`input[data-testid="file"]`)
+          .setAttribute("data-error", "");
+        document
+          .querySelector(`input[data-testid="file"]`)
+          .setAttribute("data-error-visible", false);
 
         const formData = new FormData();
         const email = JSON.parse(localStorage.getItem("user")).email;
