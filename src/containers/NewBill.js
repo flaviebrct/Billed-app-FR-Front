@@ -11,9 +11,7 @@ export default class NewBill {
     );
     formNewBill.addEventListener("submit", this.handleSubmit);
     const file = this.document.querySelector(`input[data-testid="file"]`);
-    file.addEventListener("change", () => {
-      this.handleChangeFile;
-    });
+    file.addEventListener("change", this.handleChangeFile);
     this.fileUrl = null;
     this.fileName = null;
     this.billId = null;
@@ -28,39 +26,47 @@ export default class NewBill {
     const allowedExtensions = ["jpg", "jpeg", "png"];
     const fileExtension = fileName.split(".").pop().toLowerCase();
 
-    if (!allowedExtensions.includes(fileExtension)) {
-      console.error(
-        "Extension de fichier non autorisée. Veuillez sélectionner un fichier jpg, jpeg ou png."
-      );
-      return;
+    if (file) {
+      if (!allowedExtensions.includes(fileExtension)) {
+        e.target.setAttribute("data-error", "Le fichier n'est pas autorisé.");
+        e.target.setAttribute("data-error-visible", true);
+      } else {
+        e.target.setAttribute("data-error", "");
+        e.target.setAttribute("data-error-visible", false);
+
+        const formData = new FormData();
+        const email = JSON.parse(localStorage.getItem("user")).email;
+        formData.append("file", file);
+        formData.append("email", email);
+
+        this.store
+          .bills()
+          .create({
+            data: formData,
+            headers: {
+              noContentType: true,
+            },
+          })
+          .then(({ fileUrl, key }) => {
+            this.billId = key;
+            this.fileUrl = fileUrl;
+            this.fileName = fileName;
+          })
+          .catch((error) => console.error(error));
+      }
     }
-
-    const formData = new FormData();
-    const email = JSON.parse(localStorage.getItem("user")).email;
-    formData.append("file", file);
-    formData.append("email", email);
-
-    this.store
-      .bills()
-      .create({
-        data: formData,
-        headers: {
-          noContentType: true,
-        },
-      })
-      .then(({ fileUrl, key }) => {
-        this.billId = key;
-        this.fileUrl = fileUrl;
-        this.fileName = fileName;
-      })
-      .catch((error) => console.error(error));
   };
   handleSubmit = (e) => {
     e.preventDefault();
-    console.log(
-      'e.target.querySelector(`input[data-testid="datepicker"]`).value',
-      e.target.querySelector(`input[data-testid="datepicker"]`).value
-    );
+
+    const errorVisible = this.document
+      .querySelector(`input[data-testid="file"]`)
+      .getAttribute("data-error-visible");
+    if (errorVisible === "true") {
+      console.log("Cannot submit form due to file error");
+      return;
+    }
+
     const email = JSON.parse(localStorage.getItem("user")).email;
     const bill = {
       email,
