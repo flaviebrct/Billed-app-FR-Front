@@ -63,6 +63,7 @@ describe("Given I am connected as an employee", () => {
         "user",
         JSON.stringify({
           type: "Employee",
+          email: "a@a"
         })
       );
       const root = document.createElement("div");
@@ -85,7 +86,7 @@ describe("Given I am connected as an employee", () => {
           },
         };
       });
-      window.onNavigate(ROUTES_PATH.Dashboard);
+      window.onNavigate(ROUTES_PATH.Bills);
       await new Promise(process.nextTick);
       const message = await screen.getByText(/Erreur 404/);
       expect(message).toBeTruthy();
@@ -100,7 +101,7 @@ describe("Given I am connected as an employee", () => {
         };
       });
 
-      window.onNavigate(ROUTES_PATH.Dashboard);
+      window.onNavigate(ROUTES_PATH.Bills);
       await new Promise(process.nextTick);
       const message = await screen.getByText(/Erreur 500/);
       expect(message).toBeTruthy();
