@@ -22,19 +22,24 @@ describe("Given I am connected as an employee", () => {
     });
 
     test("Then bill icon in vertical layout should be highlighted", async () => {
+      // Replaces the 'localStorage' property of the 'window' object with a mocked version, 'localStorageMock'
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
       });
+      // Sets an item in the mocked localStorage for a logged in user
       window.localStorage.setItem(
         "user",
         JSON.stringify({
           type: "Employee",
         })
       );
+      // Creating a div element with id "root" in the body of the document
       const root = document.createElement("div");
       root.setAttribute("id", "root");
       document.body.append(root);
+      // Calling the router
       router();
+      // Simulates navigation to the New Bill page
       window.onNavigate(ROUTES_PATH.NewBill);
       await waitFor(() => screen.getByTestId("icon-mail"));
       const mailIcon = screen.getByTestId("icon-mail");
@@ -45,6 +50,7 @@ describe("Given I am connected as an employee", () => {
 
   describe("When I add a new Proof file", () => {
     beforeEach(async () => {
+      // Sets an item in the mocked localStorage for a logged in user
       window.localStorage.setItem(
         "user",
         JSON.stringify({
@@ -52,21 +58,24 @@ describe("Given I am connected as an employee", () => {
           email: "employee@test.tld",
         })
       );
-
+      // Creating a div element with id "root" in the body of the document
       const root = document.createElement("div");
       root.setAttribute("id", "root");
       document.body.append(root);
       router();
 
+      // Simulates navigation to the New Bill page
       window.onNavigate(ROUTES_PATH.NewBill);
     });
     test("Then the file should not be added if is mime type isn't 'png', 'jpg' or 'jpeg' ", () => {
+      // Create a new instance of the NewBill component
       const newBills = new NewBill({
         document,
         onNavigate,
         localStorage: window.localStorage,
       });
 
+      // Simulate the adding of a new file
       const handleChangeFile = jest.fn(() => newBills.handleChangeFile);
       const fileInput = document.querySelector(`input[data-testid="file"]`);
       fileInput.addEventListener("change", (e) => handleChangeFile(e));
@@ -84,6 +93,7 @@ describe("Given I am connected as an employee", () => {
       expect(handleChangeFile).toBeCalled();
     });
     test("Then the file should be added if is mime type is 'png', 'jpg' or 'jpeg' ", () => {
+      // Create a new instance of the NewBill component
       const newBill = new NewBill({
         document,
         onNavigate,
@@ -91,6 +101,7 @@ describe("Given I am connected as an employee", () => {
         localStorage: window.localStorage,
       });
 
+      // Add a spy on the method "create" of the object newBill
       const createSpy = jest
         .spyOn(newBill.store.bills(), "create")
         .mockResolvedValue({
@@ -129,6 +140,7 @@ describe("Given I am connected as an employee", () => {
   // test d'intégration POST
   describe("When I complete the form", () => {
     test("Then if all the inputs are filled the form should be submitted and we should be redirected to the bill page", async () => {
+      // Sets an item in the mocked localStorage for a logged in user
       window.localStorage.setItem(
         "user",
         JSON.stringify({
@@ -138,6 +150,7 @@ describe("Given I am connected as an employee", () => {
         })
       );
 
+      // Creating a div element with id "root" in the body of the document
       const root = document.createElement("div");
       root.setAttribute("id", "root");
       document.body.append(root);
@@ -145,6 +158,7 @@ describe("Given I am connected as an employee", () => {
 
       const mockOnNavigate = jest.fn();
 
+      // Create a new instance of the NewBill component
       const newBill = new NewBill({
         document,
         onNavigate: mockOnNavigate,

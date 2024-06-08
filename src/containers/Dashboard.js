@@ -153,14 +153,20 @@ export default class {
       $(`#status-bills-container${this.index}`).html("");
       this.counter++;
     }
+    // Removes the event handler on the selected bill
     $(`#status-bills-container${this.index}`).off("click", ".open-bill");
 
+    // Add an event handler on the selected bill
     $(`#status-bills-container${this.index}`).on("click", ".open-bill", (e) => {
+      // We take the id of the selected bill
       const billId = $(e.currentTarget).data("bill-id");
+      // In all the bills we take the one that have the same id
       const selectedBill = bills.find((bill) => bill.id === billId);
+      // We call the handleEditTicket with the selected element when it's found
       this.handleEditTicket(e, selectedBill, bills);
     });
 
+    // For all the bills of one category ("En attente", "Validé" ou "Refusé") we add a class name "open-bill" and an bill-id attribute 
     bills.forEach((bill) => {
       $(`#open-bill${bill.id}`).addClass("open-bill").data("bill-id", bill.id);
     });

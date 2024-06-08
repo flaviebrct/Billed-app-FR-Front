@@ -20,6 +20,7 @@ const row = (bill) => {
 };
 
 const rows = (data) => {
+  // Fix : Data are sorted from earliest to latest
   return data && data.length
     ? data
         .sort((a, b) => new Date(b.date) - new Date(a.date))
